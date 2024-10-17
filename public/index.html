@@ -24,6 +24,7 @@
       <button id="setnickname" onClick="setNickname()">Set Nickname</button>
       <br/>
     </form>
+    <div id="users"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
@@ -41,6 +42,10 @@
         const messageDiv = document.createElement('div');
         messageDiv.textContent = msg;
         document.getElementById('messagesAlerts').appendChild(messageDiv);
+      }
+      function updateUserList(users){
+        const userDiv = document.getElementById('users');
+        userDiv.innerHTML = `<strong>Online: </strong> ${users.join(',')}`
       }
 
       form.addEventListener('submit', function(e){
@@ -65,6 +70,12 @@
         const nicknameField = document.getElementById('nickname')
         nicknameField.disabled = true;
       })
+
+      socket.on('user left',({user,users})=>{
+        appendMessage(`${user} has left the chat`);
+        updateUserList(users);
+      })
+      
     </script>
   </body>
 </html>

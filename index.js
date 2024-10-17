@@ -25,6 +25,13 @@ io.on('connection',(socket)=>{
     socket.on('chat message',(msg)=>{
         io.emit('chat message',msg);
     })
+
+    //detect when a user is disconnected
+    socket.on('disconnect',()=> {
+        console.log(`User ${socket.id} disconnected`);
+        delete users[socket.id];
+        io.emit('user left',{user: socket.nickname, users: Object.values(users)});
+    })
 })
 
 app.get("/", (req, res) => {
