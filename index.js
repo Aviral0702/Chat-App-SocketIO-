@@ -32,7 +32,19 @@ io.on('connection',(socket)=>{
         delete users[socket.id];
         io.emit('user left',{user: socket.nickname, users: Object.values(users)});
     })
+
+    //Functionality : Status of if a person is typing or not
+    socket.on('typing',()=> {
+        socket.broadcast.emit('typing',{user: socket.nickname});
+    })
+
+    //stop typing notification
+    socket.on('stop typing', () => {
+        socket.broadcast.emit('stop typing', { user: socket.nickname });
+    });
+
 })
+
 
 app.get("/", (req, res) => {
     res.sendFile("./public/index.html");

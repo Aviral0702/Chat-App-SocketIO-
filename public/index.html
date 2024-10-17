@@ -25,6 +25,7 @@
       <br/>
     </form>
     <div id="users"></div>
+    <div id="typing"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
@@ -47,6 +48,14 @@
         const userDiv = document.getElementById('users');
         userDiv.innerHTML = `<strong>Online: </strong> ${users.join(',')}`
       }
+
+      //typing notification
+      let typingTimeout;
+      input.addEventListener('input',()=> {
+        socket.emit('typing');
+        clearTimeout(typingTimeout);
+        typingTimeout = setTimeout(()=> socket.emit('stop typing'),1000);
+      })
 
       form.addEventListener('submit', function(e){
         e.preventDefault();
@@ -75,6 +84,14 @@
         appendMessage(`${user} has left the chat`);
         updateUserList(users);
       })
+
+      socket.on('typing',({user})=>{
+        document.getElementById('typing').textContent = `${user} is typing...`
+      })
+
+      socket.on('stop typing', ({ user }) => {
+        document.getElementById('typing').textContent = '';
+      });
       
     </script>
   </body>
