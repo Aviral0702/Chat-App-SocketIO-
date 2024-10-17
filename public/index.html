@@ -17,14 +17,36 @@
   </head>
   <body>
     <ul id="messages"></ul>
+    <div id="messagesAlerts"></div>
     <form id="form" action="">
       <input id="input" autocomplete="off" /><button>Send</button>
+      <input type="text" id="nickname" placeholder="Enter a nickname"/>
+      <button id="setnickname" onClick="setNickname()">Set Nickname</button>
+      <br/>
     </form>
+    <div id="users"></div>
     <script src="/socket.io/socket.io.js"></script>
     <script>
       var socket = io();
+      
       var form = document.getElementById('form');
       var input = document.getElementById('input');
+
+      function setNickname() {
+        const nickname = document.getElementById('nickname').value;
+        socket.emit('set nickname',nickname);
+      }
+
+      //append message to the chat
+      function appendMessage(msg) {
+        const messageDiv = document.createElement('div');
+        messageDiv.textContent = msg;
+        document.getElementById('messagesAlerts').appendChild(messageDiv);
+      }
+      function updateUserList(users){
+        const userDiv = document.getElementById('users');
+        userDiv.innerHTML = `<strong>Online: </strong> ${users.join(',')}`
+      }
 
       form.addEventListener('submit', function(e){
         e.preventDefault();
@@ -40,6 +62,20 @@
         messages.appendChild(item);
         window.scrollTo(0,document.body.scrollHeight);
       })
+
+      socket.on('nickname changed',({id,nickname})=> {
+        appendMessage(`${nickname} is now as ${nickname}`);
+        const nicknameButton = document.getElementById('setnickname');
+        nicknameButton.disabled = true;
+        const nicknameField = document.getElementById('nickname')
+        nicknameField.disabled = true;
+      })
+
+      socket.on('user left',({user,users})=>{
+        appendMessage(`${user} has left the chat`);
+        updateUserList(users);
+      })
+      
     </script>
   </body>
 </html>
